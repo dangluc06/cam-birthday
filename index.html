@@ -49,20 +49,59 @@
         // === CÁC TÙY CHỈNH ===
         const displayTime = 1750;
         const transitionTime = 1000;
-        const numberOfFallingItems = 50;
+        // *** THAY ĐỔI 1: Tăng số lượng mưa rơi gấp đôi ***
+        const numberOfFallingItems = 100; // Đã thay đổi từ 50
         const mainRedColor = "#FF4081";
         const glowColor = "#E01E5A";
         const specialWords = ["Vương Thị Hồng Cẩm", "Cẩm", "❤️"];
 
-        function drawHeart(x, y, size) {
+        // === THAY ĐỔI: Vẽ bánh sinh nhật ===
+        // Đã thay thế hàm drawHeart bằng hàm drawCake
+        function drawCake(x, y, size) {
+            const candleHeight = size * 0.3;
+            const candleWidth = size * 0.05;
+            const flameSize = size * 0.08;
+            const tier1Height = size * 0.35;
+            const tier1Width = size * 0.8;
+            const tier2Height = size * 0.4;
+            const tier2Width = size * 1.2; // Rộng hơn tầng 1
+            const cornerRadius = size * 0.05;
+
+            // Tầng 1 (trên)
+            ctx.fillStyle = mainRedColor;
             ctx.beginPath();
-            const topCurveHeight = size * 0.3;
-            ctx.moveTo(x, y + topCurveHeight);
-            ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + topCurveHeight);
-            ctx.bezierCurveTo(x - size / 2, y + (size + topCurveHeight) / 2, x, y + (size + topCurveHeight) / 1.5, x, y + size);
-            ctx.bezierCurveTo(x, y + (size + topCurveHeight) / 1.5, x + size / 2, y + (size + topCurveHeight) / 2, x + size / 2, y + topCurveHeight);
-            ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurveHeight);
-            ctx.closePath();
+            ctx.roundRect(x - tier1Width / 2, y, tier1Width, tier1Height, cornerRadius);
+            ctx.fill();
+
+            // Tầng 2 (dưới)
+            ctx.beginPath();
+            ctx.roundRect(x - tier2Width / 2, y + tier1Height, tier2Width, tier2Height, cornerRadius);
+            ctx.fill();
+            
+            // Nến (Trắng)
+            ctx.fillStyle = '#FFFFFF';
+            const candleY = y - candleHeight;
+            // Nến giữa
+            ctx.fillRect(x - candleWidth / 2, candleY, candleWidth, candleHeight);
+            // Nến trái
+            ctx.fillRect(x - tier1Width / 4 - candleWidth / 2, candleY, candleWidth, candleHeight);
+            // Nến phải
+            ctx.fillRect(x + tier1Width / 4 - candleWidth / 2, candleY, candleWidth, candleHeight);
+
+            // Ngọn lửa (Vàng)
+            ctx.fillStyle = '#FFD700'; // Vàng gold
+            const flameY = candleY - flameSize / 2;
+            // Lửa giữa
+            ctx.beginPath();
+            ctx.arc(x, flameY, flameSize, 0, Math.PI * 2);
+            ctx.fill();
+            // Lửa trái
+            ctx.beginPath();
+            ctx.arc(x - tier1Width / 4, flameY, flameSize, 0, Math.PI * 2);
+            ctx.fill();
+            // Lửa phải
+            ctx.beginPath();
+            ctx.arc(x + tier1Width / 4, flameY, flameSize, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -82,7 +121,8 @@
                 if (!this.isActive) return;
                 ctx.fillStyle = this.color;
                 ctx.shadowColor = this.color;
-                ctx.shadowBlur = 10;
+                // === THAY ĐỔI: Tối ưu hóa (mượt hơn) ===
+                ctx.shadowBlur = 5; // Giảm từ 10
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -103,7 +143,8 @@
              constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * -height;
-                this.speed = Math.random() * 3 + 2;
+                // === THAY ĐỔI: Tăng tốc độ rơi 1.25x ===
+                this.speed = (Math.random() * 3 + 2) * 1.25;
                 this.size = Math.random() * 10 + 8;
                 const fallingChars = ['❤️', '🎂', 'cẩm🥳', '💕', '❤️', 'CẨM💕'];
                 this.char = fallingChars[Math.floor(Math.random() * fallingChars.length)];
@@ -116,7 +157,8 @@
             }
             draw() {
                 ctx.font = `${this.size}px Arial`;
-                ctx.fillStyle = this.char === '❤️' ? mainRedColor : 'rgba(255, 255, 255, 0.8)';
+                // *** THAY ĐỔI 3: Làm cho các chữ rơi rõ nét, không mờ ***
+                ctx.fillStyle = this.char === '❤️' ? mainRedColor : 'rgba(255, 255, 255, 1)'; // Đã thay đổi từ 0.8
                 ctx.fillText(this.char, this.x, this.y);
             }
         }
@@ -180,7 +222,8 @@
             
             if (shouldDraw) {
                 ctx.globalAlpha = alpha;
-                ctx.shadowColor = glowColor; ctx.shadowBlur = 15;
+                // === THAY ĐỔI: Tối ưu hóa (mượt hơn) ===
+                ctx.shadowColor = glowColor; ctx.shadowBlur = 8; // Giảm từ 15
                 if (messageIndex === -1) {
                     drawIntroScreen();
                 } else {
@@ -191,15 +234,27 @@
             ctx.shadowBlur = 0;
         }
         
+        // === THAY ĐỔI: Chỉnh sửa để vẽ bánh ===
         function drawIntroScreen() {
-            const heartSize = Math.min(width/5, 120);
+            const cakeSize = Math.min(width/5, 120);
             const fontSize = Math.min(width/20, 25);
-            const totalHeight = heartSize + fontSize * 2.5;
-            let startY = height/2 - totalHeight/2;
+            
+            // Tính toán chiều cao của nến và lửa để căn giữa
+            const candleAndFlameHeight = cakeSize * 0.3 + cakeSize * 0.08;
+            const cakeBodyHeight = cakeSize * 0.35 + cakeSize * 0.4;
+            
+            const totalVisualHeight = candleAndFlameHeight + cakeBodyHeight + fontSize * 2.5;
+            let startY = height/2 - totalVisualHeight/2;
+            
             ctx.fillStyle = mainRedColor;
             ctx.shadowColor = glowColor;
-            drawHeart(width/2, startY, heartSize);
-            startY += heartSize + fontSize * 1.5;
+            
+            // Y-coordinate cho phần thân bánh (không phải nến)
+            let cakeTopY = startY + candleAndFlameHeight;
+            drawCake(width/2, cakeTopY, cakeSize);
+            
+            // Căn chỉnh chữ bên dưới bánh
+            startY = cakeTopY + cakeBodyHeight + fontSize * 1.5;
             ctx.font = `bold ${fontSize}px "Arial", sans-serif`;
             ctx.textAlign = 'center';
             ctx.fillText("20.10.2006", width/2, startY);
@@ -240,7 +295,8 @@
         }
 
         function animate() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            // *** THAY ĐỔI 2: Xóa hiệu ứng mờ (motion blur) ***
+            ctx.fillStyle = 'rgba(0, 0, 0, 1)'; // Đã thay đổi từ 0.25
             ctx.fillRect(0, 0, width, height);
             if (hasStarted) fallingItems.forEach(item => { item.update(); item.draw(); });
             
@@ -264,13 +320,17 @@
         function setup() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
+            
+            // === THAY ĐỔI: Tối ưu hóa (mượt hơn) ===
+            // Giảm mật độ hạt bằng cách tăng bước nhảy (step)
+            const densityStep = 3; // Tăng từ 2 lên 3
 
             ctx.clearRect(0,0,width,height);
             drawIntroScreen();
             introTemplate = [];
             let imageData = ctx.getImageData(0, 0, width, height).data;
-            for (let y = 0; y < height; y += 2) {
-                for (let x = 0; x < width; x += 2) {
+            for (let y = 0; y < height; y += densityStep) {
+                for (let x = 0; x < width; x += densityStep) {
                     if (imageData[(y * width + x) * 4 + 3] > 128) {
                         introTemplate.push({x, y, color: mainRedColor});
                     }
@@ -284,20 +344,16 @@
                 drawMessageScreenWithColorLogic(messages[i], i);
                 let msgTemplate = [];
                 imageData = ctx.getImageData(0, 0, width, height).data;
-                for (let y = 0; y < height; y += 2) {
-                    for (let x = 0; x < width; x += 2) {
+                for (let y = 0; y < height; y += densityStep) {
+                    for (let x = 0; x < width; x += densityStep) {
                         const imgDataIndex = (y * width + x) * 4;
                         if (imageData[imgDataIndex + 3] > 128) {
-                             // *** BẮT ĐẦU THAY ĐỔI ***
                              if (i === messages.length - 1) {
-                                 // Nếu là tin nhắn cuối, TẤT CẢ các hạt phải có màu hồng
                                  msgTemplate.push({x, y, color: mainRedColor});
                              } else {
-                                 // Nếu không, giữ nguyên logic phát hiện màu
                                  const isRed = imageData[imgDataIndex] > 150 && imageData[imgDataIndex+1] < 100 && imageData[imgDataIndex+2] < 100;
                                  msgTemplate.push({x, y, color: isRed ? mainRedColor : '#fff'});
                              }
-                             // *** KẾT THÚC THAY ĐỔI ***
                         }
                     }
                 }
@@ -344,11 +400,17 @@
             }
         }
 
+        // === THAY ĐỔI: Thêm kiểm tra mật khẩu ===
         canvas.addEventListener('click', () => {
             if (state === 'start-hold' && !hasStarted) {
-                hasStarted = true;
-                for (let i = 0; i < numberOfFallingItems; i++) fallingItems.push(new FallingObject());
-                nextMessage();
+                const password = prompt("❤️ Vui lòng nhập mật khẩu (DDMMYYYY) ❤️");
+                if (password === "20102006") {
+                    hasStarted = true;
+                    for (let i = 0; i < numberOfFallingItems; i++) fallingItems.push(new FallingObject());
+                    nextMessage();
+                } else if (password !== null && password !== "") {
+                    alert("Mật khẩu không đúng. Thử lại nha!");
+                }
             }
         });
         
