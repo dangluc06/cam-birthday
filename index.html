@@ -49,14 +49,34 @@
         // === CÁC TÙY CHỈNH ===
         const displayTime = 1750;
         const transitionTime = 1000;
-        // *** THAY ĐỔI 1: Tăng số lượng mưa rơi gấp đôi ***
-        const numberOfFallingItems = 100; // Đã thay đổi từ 50
+        const numberOfFallingItems = 100;
         const mainRedColor = "#FF4081";
         const glowColor = "#E01E5A";
         const specialWords = ["Vương Thị Hồng Cẩm", "Cẩm", "❤️"];
 
-        // === THAY ĐỔI: Vẽ bánh sinh nhật ===
-        // Đã thay thế hàm drawHeart bằng hàm drawCake
+        // === THÊM HÌNH ẢNH RƠI ===
+        let loadedFallingImages = [];
+        let imagesLoaded = false;
+        
+        // !!! QUAN TRỌNG: Đây là 10 link ví dụ. BẠN PHẢI THAY THẾ 10 LINK NÀY BẰNG LINK ẢNH CỦA BẠN !!!
+        // (Nên dùng link .png nền trong suốt)
+        const fallingImageSources = [
+            'https://i.postimg.cc/02sXk6GW/gen-n-z7129713792064-cfb10c7199c5122bdfe9f243bccc9a22.jpg', // THAY LINK 1
+            'https://i.postimg.cc/GhXFW9X2/gen-h-z7130208684109-028a33bde9322c2da5e990b0998bd2f6.jpg', // THAY LINK 2
+            'https://i.postimg.cc/fLbZg2y7/gen-h-z7130204923290-ed54bc74d1c6a465a46c390a91bdaa1a.jpg', // THAY LINK 3
+            'https://i.postimg.cc/3rsNdhWP/gen-h-z7129713833362-b36747be86bb96067a187f235e800e5b.jpg', // THAY LINK 4
+            'https://i.postimg.cc/wMpKYwTr/gen-h-z7130208755603-1037df8e3c54ab3ddadb4a090db6bb78.jpg', // THAY LINK 5
+            'https://i.postimg.cc/4xCL3WC4/gen-t-z7129713832838-287bf50668ebf12bdc42552ffbdb0454.jpg', // THAY LINK 6
+            'https://i.postimg.cc/prHQH65b/gen-n-z7130277011439-b41785285ae49b977da8819643565492.jpg', // THAY LINK 7
+            'https://i.postimg.cc/PxhNrsyL/gen-n-z7129713802054-dff21e39da39d43315e144165eab26c5.jpg', // THAY LINK 8
+            'https://i.postimg.cc/bvqjZyXp/gen-h-z7129713863831-5aba03217dd895bcef4f0ea02a7ba866.jpg', // THAY LINK 9
+            'https://i.postimg.cc/gJQzXCHP/gen-n-z7129713788020-f15c2555ee1f1b3794ece77d04988938.jpg'  // THAY LINK 10
+        ];
+        
+        const fallingChars = ['❤️', '🎂', 'cẩm🥳', '💕', '❤️', 'CẨM💕'];
+        // ===================================
+
+        // === Vẽ bánh sinh nhật ===
         function drawCake(x, y, size) {
             const candleHeight = size * 0.3;
             const candleWidth = size * 0.05;
@@ -64,45 +84,28 @@
             const tier1Height = size * 0.35;
             const tier1Width = size * 0.8;
             const tier2Height = size * 0.4;
-            const tier2Width = size * 1.2; // Rộng hơn tầng 1
+            const tier2Width = size * 1.2;
             const cornerRadius = size * 0.05;
 
-            // Tầng 1 (trên)
             ctx.fillStyle = mainRedColor;
             ctx.beginPath();
             ctx.roundRect(x - tier1Width / 2, y, tier1Width, tier1Height, cornerRadius);
             ctx.fill();
-
-            // Tầng 2 (dưới)
             ctx.beginPath();
             ctx.roundRect(x - tier2Width / 2, y + tier1Height, tier2Width, tier2Height, cornerRadius);
             ctx.fill();
             
-            // Nến (Trắng)
             ctx.fillStyle = '#FFFFFF';
             const candleY = y - candleHeight;
-            // Nến giữa
             ctx.fillRect(x - candleWidth / 2, candleY, candleWidth, candleHeight);
-            // Nến trái
             ctx.fillRect(x - tier1Width / 4 - candleWidth / 2, candleY, candleWidth, candleHeight);
-            // Nến phải
             ctx.fillRect(x + tier1Width / 4 - candleWidth / 2, candleY, candleWidth, candleHeight);
 
-            // Ngọn lửa (Vàng)
-            ctx.fillStyle = '#FFD700'; // Vàng gold
+            ctx.fillStyle = '#FFD700';
             const flameY = candleY - flameSize / 2;
-            // Lửa giữa
-            ctx.beginPath();
-            ctx.arc(x, flameY, flameSize, 0, Math.PI * 2);
-            ctx.fill();
-            // Lửa trái
-            ctx.beginPath();
-            ctx.arc(x - tier1Width / 4, flameY, flameSize, 0, Math.PI * 2);
-            ctx.fill();
-            // Lửa phải
-            ctx.beginPath();
-            ctx.arc(x + tier1Width / 4, flameY, flameSize, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(x, flameY, flameSize, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x - tier1Width / 4, flameY, flameSize, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x + tier1Width / 4, flameY, flameSize, 0, Math.PI * 2); ctx.fill();
         }
 
         class Particle {
@@ -121,8 +124,7 @@
                 if (!this.isActive) return;
                 ctx.fillStyle = this.color;
                 ctx.shadowColor = this.color;
-                // === THAY ĐỔI: Tối ưu hóa (mượt hơn) ===
-                ctx.shadowBlur = 5; // Giảm từ 10
+                ctx.shadowBlur = 5;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -139,29 +141,60 @@
             }
         }
 
+        // === Cập nhật logic kích thước trong FallingObject ===
         class FallingObject {
              constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * -height;
-                // === THAY ĐỔI: Tăng tốc độ rơi 1.25x ===
                 this.speed = (Math.random() * 3 + 2) * 1.25;
-                this.size = Math.random() * 10 + 8;
-                const fallingChars = ['❤️', '🎂', 'cẩm🥳', '💕', '❤️', 'CẨM💕'];
-                this.char = fallingChars[Math.floor(Math.random() * fallingChars.length)];
+                
+                const hasImages = loadedFallingImages.length > 0;
+                
+                // 50% cơ hội là ảnh (nếu ảnh đã được tải), 50% là chữ
+                if (hasImages && Math.random() > 0.5) {
+                    this.type = 'image';
+                    this.img = loadedFallingImages[Math.floor(Math.random() * loadedFallingImages.length)];
+                    
+                    // Ảnh sẽ có 2 kích cỡ: 50% mini, 50% to
+                    if (Math.random() > 0.5) {
+                        // Kích cỡ "to" (lớn): 30px đến 45px
+                        this.size = Math.random() * 15 + 30;
+                    } else {
+                        // Kích cỡ "mini": 15px đến 25px
+                        this.size = Math.random() * 10 + 15;
+                    }
+                } else {
+                    this.type = 'text';
+                    this.char = fallingChars[Math.floor(Math.random() * fallingChars.length)];
+                    // Kích cỡ cho chữ (các hiệu ứng mưa rơi khác): 10px đến 25px
+                    this.size = Math.random() * 15 + 10; 
+                }
             }
+            
             update() {
                 this.y += this.speed;
                 if (this.y > height + this.size) {
                     this.y = -this.size; this.x = Math.random() * width;
                 }
             }
+
             draw() {
-                ctx.font = `${this.size}px Arial`;
-                // *** THAY ĐỔI 3: Làm cho các chữ rơi rõ nét, không mờ ***
-                ctx.fillStyle = this.char === '❤️' ? mainRedColor : 'rgba(255, 255, 255, 1)'; // Đã thay đổi từ 0.8
-                ctx.fillText(this.char, this.x, this.y);
+                if (this.type === 'image') {
+                    // Vẽ hình ảnh
+                    try {
+                        ctx.drawImage(this.img, this.x, this.y, this.size, this.size);
+                    } catch (e) {
+                        // Phòng trường hợp ảnh bị lỗi
+                    }
+                } else {
+                    // Vẽ chữ như cũ
+                    ctx.font = `${this.size}px Arial`;
+                    ctx.fillStyle = this.char === '❤️' ? mainRedColor : 'rgba(255, 255, 255, 1)';
+                    ctx.fillText(this.char, this.x, this.y);
+                }
             }
         }
+        // ===================================================================
 
         function setParticleTargets(template) {
             if (!template) return;
@@ -222,8 +255,7 @@
             
             if (shouldDraw) {
                 ctx.globalAlpha = alpha;
-                // === THAY ĐỔI: Tối ưu hóa (mượt hơn) ===
-                ctx.shadowColor = glowColor; ctx.shadowBlur = 8; // Giảm từ 15
+                ctx.shadowColor = glowColor; ctx.shadowBlur = 8;
                 if (messageIndex === -1) {
                     drawIntroScreen();
                 } else {
@@ -234,12 +266,10 @@
             ctx.shadowBlur = 0;
         }
         
-        // === THAY ĐỔI: Chỉnh sửa để vẽ bánh ===
         function drawIntroScreen() {
             const cakeSize = Math.min(width/5, 120);
             const fontSize = Math.min(width/20, 25);
             
-            // Tính toán chiều cao của nến và lửa để căn giữa
             const candleAndFlameHeight = cakeSize * 0.3 + cakeSize * 0.08;
             const cakeBodyHeight = cakeSize * 0.35 + cakeSize * 0.4;
             
@@ -249,11 +279,9 @@
             ctx.fillStyle = mainRedColor;
             ctx.shadowColor = glowColor;
             
-            // Y-coordinate cho phần thân bánh (không phải nến)
             let cakeTopY = startY + candleAndFlameHeight;
             drawCake(width/2, cakeTopY, cakeSize);
             
-            // Căn chỉnh chữ bên dưới bánh
             startY = cakeTopY + cakeBodyHeight + fontSize * 1.5;
             ctx.font = `bold ${fontSize}px "Arial", sans-serif`;
             ctx.textAlign = 'center';
@@ -295,8 +323,7 @@
         }
 
         function animate() {
-            // *** THAY ĐỔI 2: Xóa hiệu ứng mờ (motion blur) ***
-            ctx.fillStyle = 'rgba(0, 0, 0, 1)'; // Đã thay đổi từ 0.25
+            ctx.fillStyle = 'rgba(0, 0, 0, 1)';
             ctx.fillRect(0, 0, width, height);
             if (hasStarted) fallingItems.forEach(item => { item.update(); item.draw(); });
             
@@ -321,9 +348,7 @@
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
             
-            // === THAY ĐỔI: Tối ưu hóa (mượt hơn) ===
-            // Giảm mật độ hạt bằng cách tăng bước nhảy (step)
-            const densityStep = 3; // Tăng từ 2 lên 3
+            const densityStep = 3;
 
             ctx.clearRect(0,0,width,height);
             drawIntroScreen();
@@ -400,12 +425,13 @@
             }
         }
 
-        // === THAY ĐỔI: Thêm kiểm tra mật khẩu ===
         canvas.addEventListener('click', () => {
-            if (state === 'start-hold' && !hasStarted) {
+            // Chỉ cho phép click khi ảnh đã tải xong
+            if (imagesLoaded && state === 'start-hold' && !hasStarted) {
                 const password = prompt("❤️ Vui lòng nhập mật khẩu (DDMMYYYY) ❤️");
                 if (password === "20102006") {
                     hasStarted = true;
+                    // Tạo các vật thể rơi SAU KHI nhập đúng mật khẩu
                     for (let i = 0; i < numberOfFallingItems; i++) fallingItems.push(new FallingObject());
                     nextMessage();
                 } else if (password !== null && password !== "") {
@@ -414,8 +440,65 @@
             }
         });
         
-        window.addEventListener('resize', setup);
-        setup();
+        window.addEventListener('resize', () => {
+            if (imagesLoaded) { // Chỉ setup lại khi ảnh đã sẵn sàng
+                 setup();
+            }
+        });
+
+        // === Hàm tải ảnh ===
+        function preloadFallingImages(callback) {
+            let loadedCount = 0;
+            const totalImages = fallingImageSources.length;
+            
+            // Nếu không có ảnh nào, bỏ qua và chạy callback
+            if (totalImages === 0) {
+                imagesLoaded = true;
+                callback();
+                return;
+            }
+
+            fallingImageSources.forEach(src => {
+                const img = new Image();
+                img.src = src;
+                img.onload = () => {
+                    loadedCount++;
+                    loadedFallingImages.push(img);
+                    if (loadedCount === totalImages) {
+                        imagesLoaded = true;
+                        callback();
+                    }
+                };
+                img.onerror = () => {
+                    loadedCount++;
+                    console.warn(`Không thể tải ảnh: ${src}`);
+                    if (loadedCount === totalImages) {
+                        imagesLoaded = true;
+                        callback();
+                    }
+                };
+            });
+        }
+
+        // === Thêm màn hình loading đơn giản ===
+        function showLoading() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Đang tải...', width / 2, height / 2);
+        }
+        
+        // Bắt đầu chạy
+        showLoading(); // Hiển thị "Đang tải"
+        preloadFallingImages(() => {
+            // Khi ảnh đã tải xong, chạy setup()
+            setup();
+        });
+
     </script>
 </body>
 </html>
